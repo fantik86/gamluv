@@ -1,0 +1,14 @@
+Hi, this program can read assembly code.
+
+Opcodes table from opcodes.c file contains table of opcodes with their names (as strings), pointers to their functions and count of arguments.
+
+Instruction can be:
+mov eax,5
+mov ebx, 6
+Instruction can't be:
+moveax,5
+
+
+
+Max size of each argument (in symbols) is 31.
+Max count of arguments is 2.
