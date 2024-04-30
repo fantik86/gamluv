@@ -1,5 +1,5 @@
-#ifndef OPCODES_H_
-#define OPCODES_H_
+#ifndef OPCODES_H
+#define OPCODES_H
 #define OPCODES_MAX 256
 
 void op_mov(int* a, int* b);

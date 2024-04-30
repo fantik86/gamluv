@@ -5,8 +5,8 @@
 
 typedef struct {
   unsigned char opcode_index;
-  int arg1;
-  int arg2;
+  void* arg1;
+  void* arg2;
 } code_instruction;
 
 void readfile(FILE* file);

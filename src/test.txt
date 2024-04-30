@@ -1,2 +1,2 @@
-add 25,45  
+mov A,45  
 hello!
