@@ -12,3 +12,6 @@ moveax,5
 
 Max size of each argument (in symbols) is 31.
 Max count of arguments is 2.
+
+Executable program have 65535 bytes of memory.
+First 128 bytes 

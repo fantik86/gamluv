@@ -1,3 +1,5 @@
+#define REGISTERS_MAX 128
+
 typedef struct {
   char* name;
   unsigned char value;
@@ -27,3 +29,5 @@ typedef struct {
   char* name;
   int value;
 } register_32;
+
+extern void* register_table[REGISTERS_MAX];

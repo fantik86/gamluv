@@ -1,20 +1,21 @@
 #include "lexer.h"
 #include "opcodes.h"
+#include "executer.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 
 void loadopcode(char* line, code_instruction* instruction) {
-  char* opcode;
+  char* opcode = (char*)malloc(32 * sizeof(char));
   for (int i = 0; line[i] != '\0'; i++) {
     if (line[i] == ' ') {
       opcode[i] = '\0';
-      instruction->opcode = (unsigned char)getopcode(opcode);
+      instruction->opcode_index = (unsigned char)getopcodeindex(opcode);
       return;
     }
     opcode[i] = line[i];
-  }
+    }
 }
 
 void loadarg2(char* line, int startpos, code_instruction* instruction) {
@@ -32,8 +33,9 @@ void loadarg2(char* line, int startpos, code_instruction* instruction) {
 void loadargs(char* line, code_instruction* instruction) {
   int i;
   char* char_arg1 = (char*)malloc(32 * sizeof(char));
-  int startpos = strlen(opcode_table[instruction->opcode].name) + 1;
-  int argscount = getopcodeargcount(instruction->opcode);
+  int startpos = strlen(opcode_table[instruction->opcode_index].name) + 1;
+  int argscount = getopcodeargcount(instruction->opcode_index);
+  
   if (argscount >= 1) {
   
     for (i = startpos; line[i] != '\0'; i++) {
@@ -67,11 +69,12 @@ int** readline(char* line) {
   
   loadopcode(line, &instruction);
   loadargs(line, &instruction);
-  printf("instruction = {\n\t%hhu,\n\t%d,\n\t%d\n}\n", instruction.opcode, instruction.arg1, instruction.arg2);
+  execute_instruction(&instruction);
+  printf("instruction = {\n\t%hhu,\n\t%d,\n\t%d\n}\n", instruction.opcode_index, instruction.arg1, instruction.arg2);
 }
 
 /* Returns opcode index from opcode table */
-unsigned char getopcode(char* opcodestr) {
+unsigned char getopcodeindex(char* opcodestr) {
   for (int i = 0; i < OPCODES_MAX; i++) {
     if (opcode_table[i].name != NULL)
     if (strcmp(opcodestr, opcode_table[i].name) == 0) {
@@ -80,8 +83,8 @@ unsigned char getopcode(char* opcodestr) {
   }
 }
 
-unsigned char getopcodeargcount(unsigned char opcodeindex) {
-  return opcode_table[opcodeindex].argument_count;
+unsigned char getopcodeargcount(unsigned char index) {
+  return opcode_table[index].argument_count;
 }
 
 void readfile(FILE* file) {
