@@ -1,2 +1,1 @@
-mov A,45  
-hello!
+add 2,45  
