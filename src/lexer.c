@@ -1,117 +1,140 @@
-#include "lexer.h"
-#include "opcodes.h"
-#include "executer.h"
-#include "registers.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-
+#include "lexer.h"
+#include "opcodes.h"
+#include "executer.h"
+#include "registers.h"
 #define CHAR_COMMA ','
 #define CHAR_SPACE ' '
 #define CHAR_ENDLINE '\0'
 
-void loadopcode(char* line, code_instruction* instruction) {
+int loadopcode(char* line,
+		code_instruction* instruction) {
 
   char* opcode_str = (char*)malloc(32 * sizeof(char));
   for (int i = 0; line[i] != CHAR_ENDLINE; i++) {
     if (line[i] == CHAR_SPACE) {
       opcode_str[i] = CHAR_ENDLINE;
-      instruction->opcode_index = (unsigned char)getopcodeindex(opcode_str);
-      return;
+      instruction->opcode_index = (uint8_t)getopcodeindex(opcode_str);
+      free(opcode_str);
+      return 0;
     }
     opcode_str[i] = line[i];
   }
+  /* Opcode not found */
+  free(opcode_str);
+  return 1;
 }
 
-void loadarg2(char* line, int startpos,
+int loadarg2(char* line, int startpos,
 	      code_instruction* instruction) {
 
+  int* arg2;
   int result;
   char* char_arg2 = (char*)malloc(32 * sizeof(char));
+  for (int i = 0; i < 32; i++)
+    char_arg2[i] = CHAR_SPACE;
+  
   
   for (int i = startpos; line[i] != CHAR_ENDLINE; i++) {
-    if (line[i] == ' ' || line[i] == CHAR_ENDLINE) {
+    if (line[i] == CHAR_SPACE) {
       char_arg2[i] = CHAR_ENDLINE;
       result = atoi(char_arg2);
-      
       if (!result)
 	instruction->arg2 = (register_32*)find_register(char_arg2);
       else {
-        instruction->arg2 = malloc(sizeof(int));
-        *((int*)instruction->arg2) = result;
+        arg2 = (int*)malloc(sizeof(int));
+	*arg2 = result;
+        instruction->arg2 = arg2;
       }
-      return;
+      free(char_arg2);
+      return 0;
     }
     /* [i - startpos] - appending chars from 0 index */
     char_arg2[i - startpos] = line[i]; 
   }
+  free(char_arg2);
+  return 1;
 }
 
-void loadargs(char* line, code_instruction* instruction) {
+
+int loadargs(char* line,
+	      code_instruction* instruction) {
   
   int result;
-  char* char_arg1 = (char*)malloc(32 * sizeof(char));
+  int* arg1;
+  register_32* reg;
   char* opcode_name = opcode_table[instruction->opcode_index].name;
   int pos = strlen(opcode_name) + 1; /* Start position */
   int argscount = getopcodeargcount(instruction->opcode_index);
-
+  
+  char* char_arg1 = (char*)malloc(32 * sizeof(char));
+  for (int i = 0; i < 32; i++)
+    char_arg1[i] = CHAR_SPACE;
+  
   if (argscount == 0) {
-    fprintf(stderr, "Error: instruction have 0 arguments\n");
-    return;
+    /* TODO: Add logic for 0 args instructions */
+    return 1;
   }
   
   if (argscount >= 1) {
-
-    for (; line[pos] != '\0'; pos++) {
+    for (; line[pos] != CHAR_ENDLINE; pos++) {
+      
+      if (line[pos] == CHAR_SPACE) 
+	continue;
+      
       if (line[pos] == CHAR_COMMA) {
-
-	char_arg1[pos] = '\0';
-
+	char_arg1[pos] = CHAR_ENDLINE;
 	result = atoi(char_arg1);
-
+	
+	/* result = 0 means that argument is most likely register */
 	if (!result) {
-	  register_32* reg = (register_32*)find_register(char_arg1);
-	  int* arg1 = instruction->arg1;
-	  printf("%d\n", (int)(reg->value));
+	  reg = (register_32*)find_register(char_arg1);
+	  arg1 = instruction->arg1;
 	} else {
-	  instruction->arg1 = malloc(sizeof(int));
-	  *((int*)instruction->arg1) = result;
+	  arg1 = malloc(sizeof(int));
+	  *arg1 = result;
+	  instruction->arg1 = arg1;
 	}
 	if (argscount == 2)
 	  loadarg2(line, pos+1, instruction);
 	
-	return;
+	free(char_arg1);
+	return 0;
       }
-      if (line[pos] == ' ') 
-	continue;
 
       char_arg1[pos - (strlen(opcode_name) + 1)] = line[pos];
     }
-    
+    free(char_arg1);
+    return 1;
   }
 }
 
-int** readline(char* line) {
+void readline(char* line) {
   
   code_instruction instruction;
   
   loadopcode(line, &instruction);
   loadargs(line, &instruction);
-  //execute_instruction(&instruction);
-  printf("instruction = {\n\t%hhu,\n\t%d,\n\t%d\n}\n", instruction.opcode_index, instruction.arg1, instruction.arg2);
+  execute_instruction(&instruction);
+  printf("instruction = {\n\t%hhu,\n\t%d,\n\t%d\n}\n", instruction.opcode_index, *(int*)instruction.arg1, *(int*)instruction.arg2);
 }
 
 /* Returns opcode index from opcode table */
-unsigned char getopcodeindex(char* opcodestr) {
+uint8_t getopcodeindex(char* opcodestr) {
   for (int opcodeindex = 0; opcodeindex < OPCODES_MAX; opcodeindex++)
     if (opcode_table[opcodeindex].name &&
 	strcmp(opcodestr, opcode_table[opcodeindex].name) == 0)
-	return (unsigned char)opcodeindex;
+	return (uint8_t)opcodeindex;
+  return 0;
 }
 
-unsigned char getopcodeargcount(unsigned char index) {
-  return opcode_table[index].argument_count;
+uint8_t getopcodeargcount(uint8_t index) {
+  if (opcode_table[index].argument_count)
+    return opcode_table[index].argument_count;
+  return 0;
 }
 
 void readfile(FILE* file) {
