@@ -1,23 +1,23 @@
 #include "opcodes.h"
 
 void op_mov(int* a, int* b) {
-  *a = *b;
+  *(int*)a = *(int*)b;
 }
 
 void op_add(int* a, int* b) {
-  *a += *b;
+  *(int*)a += *(int*)b;
 }
 
 void op_inc(int* a, int* b) {
-  *a++;
+  *(int*)a++;
 }
 
 void op_sub(int* a, int* b) {
-  *a -= *b;
+  *(int*)a -= *(int*)b;
 }
 
 void op_dec(int* a, int* b) {
-  *a--;
+  *(int*)a--;
 }
 
 
