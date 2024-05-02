@@ -10,13 +10,13 @@ void execute_instruction(code_instruction* instruction) {
   int* arg1_ptr = (int*)instruction->arg1;
   void (*opcode_call)();
   opcode_call = opcode_table[index].function_ptr;
-  if (*(int*)&instruction->arg1 == min)
+  if (*(int*)instruction->arg1 == min)
     /* No arguments */
     opcode_call(&min, &min); 
-  else if (*(int*)&instruction->arg2 == min)
+  else if (*(int*)instruction->arg2 == min)
     /* 1 argument */
-    opcode_call((int*)&instruction->arg1, &min); 
+    opcode_call(instruction->arg1, &min); 
   else
     /* 2 arguments */
-    opcode_call((int*)instruction->arg1, (int*)instruction->arg2); 
+    opcode_call(instruction->arg1, instruction->arg2); 
 }

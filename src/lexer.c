@@ -92,7 +92,7 @@ int loadargs(char* line,
 	/* result = 0 means that argument is most likely register */
 	if (!result) {
 	  reg = (register_32*)find_register(char_arg1);
-	  arg1 = instruction->arg1;
+	  instruction->arg1 = &reg->value;
 	} else {
 	  arg1 = malloc(sizeof(int));
 	  *arg1 = result;
