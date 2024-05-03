@@ -1,36 +1,21 @@
 #ifndef REGISTERS_H
 
 #define REGISTERS_H
-#define REGISTERS_MAX 128
+#define REGISTERS_MAX 16
+#include <stdbool.h>
 
+/* NOTE: at 03.05.2024, isreadonly is not used. */
 typedef struct {
+  bool isreadonly;
   char* name;
-  unsigned char value;
-} register_u8;
+  void* value;
+} asm_register;
 
-typedef struct {
-  char* name;
-  unsigned int value;
-} register_u32;
-
-typedef struct {
-  char* name;
-  char value;
-} register_8;
-
-typedef struct {
-  char* name;
-  float value;
-} register_16;
-
-typedef struct {
-  char* name;
-  int value;
-} register_32;
+extern void* register_table[REGISTERS_MAX];
 
 void* find_register(char* register_name);
 void init_register_table(void);
-
-extern void* register_table[REGISTERS_MAX];
+int init_register(int index, bool isreadonly, char* name, void* value);
+void* get_register_value(char* name);
 
 #endif

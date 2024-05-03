@@ -20,7 +20,7 @@ int write_instruction(char* line,
       opcode_str[i] = CHAR_ENDLINE;
       instruction->opcode_index = (uint8_t)getopcodeindex(opcode_str);
 
-      loadargs(line, strlen(opcode_str), instruction);
+      write_arguments(line, strlen(opcode_str), instruction);
       free(opcode_str);
       return 0;
     }
@@ -36,7 +36,7 @@ int loadarg2(char* line, int startpos,
 
   int* arg2;
   int result;
-  register_32* reg;
+  asm_register* reg;
   char* char_arg2 = (char*)malloc(32 * sizeof(char));
   for (int i = 0; i < 32; i++)
     char_arg2[i] = CHAR_SPACE;
@@ -49,7 +49,7 @@ int loadarg2(char* line, int startpos,
       char_arg2[i] = CHAR_ENDLINE;
       result = atoi(char_arg2);
       if (!result) {
-	reg = (register_32*)find_register(char_arg2);
+	reg = (asm_register*)find_register(char_arg2);
 	instruction->arg2 = &reg->value;
       } else {
         arg2 = (int*)malloc(sizeof(int));
@@ -67,12 +67,12 @@ int loadarg2(char* line, int startpos,
 }
 
 
-int loadargs(char* line, int startpos,
+int write_arguments(char* line, int startpos,
 	      code_instruction* instruction) {
   
   int result;
   int* arg1;
-  register_32* reg;
+  asm_register* reg;
   char* opcode_name = opcode_table[instruction->opcode_index].name;
   int pos = strlen(opcode_name) + 1; /* Start position */
   int argscount = getopcodeargcount(instruction->opcode_index);
@@ -96,7 +96,7 @@ int loadargs(char* line, int startpos,
 	result = atoi(char_arg1);
 	/* result = 0 means that argument is most likely register */
 	if (!result) {
-	  reg = (register_32*)find_register(char_arg1);
+	  reg = (asm_register*)find_register(char_arg1);
 	  instruction->arg1 = &reg->value;
 	} else {
 	  arg1 = (int*)malloc(sizeof(int));
@@ -123,6 +123,7 @@ void readline(char* line) {
   write_instruction(line, &instruction);
   execute_instruction(&instruction);
   printf("instruction = {\n\t%hhu,\n\t%d,\n\t%d\n}\n", instruction.opcode_index, *(int*)instruction.arg1, *(int*)instruction.arg2);
+  printf("%d\n", get_register_value("A"));
 }
 
 /* Returns opcode index from opcode table */

@@ -3,19 +3,48 @@
 #include <string.h>
 #include "registers.h"
 
+char* register_names[REGISTERS_MAX] = {
+  "A", "B", "AC"
+};
+
 void* register_table[REGISTERS_MAX];
 
-void init_register_table(void) {
-  register_table[0] = malloc(sizeof(register_32));
-  ((register_32*)register_table[0])->name = "A";
+/* Type cast of value variable is necessary! */
+int init_register(int index, bool isreadonly,
+		  char* name, void* value) {
 
-  register_table[1] = malloc(sizeof(register_32));
-  ((register_32*)register_table[1])->name = "B";
+  if (index > REGISTERS_MAX)
+    return 1;
+
+  asm_register* reg = malloc(sizeof(asm_register));
+
+  reg->isreadonly = isreadonly;
+  reg->name = name;
+  reg->value = value;
+  
+  register_table[index] = reg;
+  return 0;
+}
+
+void* get_register_value(char* name) {
+  for (int i = 0; i < REGISTERS_MAX; i++) {
+    if (strcmp(((asm_register*)register_table[i])->name, name))
+      return ((asm_register*)register_table[i])->value;
+  }
+}
+
+void init_register_table(void) {
+  for (int i = 0; i < REGISTERS_MAX; i++) {
+    if (!register_names[i])
+      break;
+    
+    init_register(i, false, register_names[i], NULL);
+  }
 }
 
 void* find_register(char* register_name) {
   for (int i = 0; i < REGISTERS_MAX; i++) {
-    if (strcmp(((register_32*)register_table[i])->name, register_name))
+    if (strcmp(((asm_register*)register_table[i])->name, register_name))
       return register_table[i];
     }
 }

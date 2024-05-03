@@ -21,7 +21,7 @@ uint8_t getopcodeargcount(uint8_t index);
 int write_instruction(char* line,
 	     code_instruction* instruction);
 
-int loadargs(char* line, int startpos,
+int write_arguments(char* line, int startpos,
 	     code_instruction* instruction);
 
 int loadarg2(char* line, int startpos,
