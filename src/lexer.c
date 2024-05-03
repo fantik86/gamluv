@@ -9,8 +9,9 @@
 #define CHAR_COMMA ','
 #define CHAR_SPACE ' '
 #define CHAR_ENDLINE '\0'
+#define CHAR_NEWLINE '\n'
 
-int loadopcode(char* line,
+int write_instruction(char* line,
 		code_instruction* instruction) {
 
   char* opcode_str = (char*)malloc(32 * sizeof(char));
@@ -18,6 +19,8 @@ int loadopcode(char* line,
     if (line[i] == CHAR_SPACE) {
       opcode_str[i] = CHAR_ENDLINE;
       instruction->opcode_index = (uint8_t)getopcodeindex(opcode_str);
+
+      loadargs(line, strlen(opcode_str), instruction);
       free(opcode_str);
       return 0;
     }
@@ -33,18 +36,22 @@ int loadarg2(char* line, int startpos,
 
   int* arg2;
   int result;
+  register_32* reg;
   char* char_arg2 = (char*)malloc(32 * sizeof(char));
   for (int i = 0; i < 32; i++)
     char_arg2[i] = CHAR_SPACE;
   
-  
   for (int i = startpos; line[i] != CHAR_ENDLINE; i++) {
-    if (line[i] == CHAR_SPACE) {
+    if (line[i] == CHAR_SPACE || line[i] == CHAR_COMMA)
+      continue;
+	
+    if (line[i] == CHAR_NEWLINE) {
       char_arg2[i] = CHAR_ENDLINE;
       result = atoi(char_arg2);
-      if (!result)
-	instruction->arg2 = (register_32*)find_register(char_arg2);
-      else {
+      if (!result) {
+	reg = (register_32*)find_register(char_arg2);
+	instruction->arg2 = &reg->value;
+      } else {
         arg2 = (int*)malloc(sizeof(int));
 	*arg2 = result;
         instruction->arg2 = arg2;
@@ -53,14 +60,14 @@ int loadarg2(char* line, int startpos,
       return 0;
     }
     /* [i - startpos] - appending chars from 0 index */
-    char_arg2[i - startpos] = line[i]; 
+    char_arg2[i - startpos] = line[i];
   }
   free(char_arg2);
   return 1;
 }
 
 
-int loadargs(char* line,
+int loadargs(char* line, int startpos,
 	      code_instruction* instruction) {
   
   int result;
@@ -69,7 +76,6 @@ int loadargs(char* line,
   char* opcode_name = opcode_table[instruction->opcode_index].name;
   int pos = strlen(opcode_name) + 1; /* Start position */
   int argscount = getopcodeargcount(instruction->opcode_index);
-  
   char* char_arg1 = (char*)malloc(32 * sizeof(char));
   for (int i = 0; i < 32; i++)
     char_arg1[i] = CHAR_SPACE;
@@ -86,25 +92,23 @@ int loadargs(char* line,
 	continue;
       
       if (line[pos] == CHAR_COMMA) {
-	char_arg1[pos] = CHAR_ENDLINE;
+	char_arg1[pos+1] = CHAR_ENDLINE;
 	result = atoi(char_arg1);
-	
 	/* result = 0 means that argument is most likely register */
 	if (!result) {
 	  reg = (register_32*)find_register(char_arg1);
 	  instruction->arg1 = &reg->value;
 	} else {
-	  arg1 = malloc(sizeof(int));
+	  arg1 = (int*)malloc(sizeof(int));
 	  *arg1 = result;
 	  instruction->arg1 = arg1;
 	}
 	if (argscount == 2)
-	  loadarg2(line, pos+1, instruction);
+	  loadarg2(line, pos, instruction);
 	
 	free(char_arg1);
 	return 0;
       }
-
       char_arg1[pos - (strlen(opcode_name) + 1)] = line[pos];
     }
     free(char_arg1);
@@ -116,8 +120,7 @@ void readline(char* line) {
   
   code_instruction instruction;
   
-  loadopcode(line, &instruction);
-  loadargs(line, &instruction);
+  write_instruction(line, &instruction);
   execute_instruction(&instruction);
   printf("instruction = {\n\t%hhu,\n\t%d,\n\t%d\n}\n", instruction.opcode_index, *(int*)instruction.arg1, *(int*)instruction.arg2);
 }

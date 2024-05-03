@@ -18,6 +18,13 @@ uint8_t getopcodeindex(char* opcodestr);
 
 uint8_t getopcodeargcount(uint8_t index);
 
-int loadargs(char* line, code_instruction* instruction);
+int write_instruction(char* line,
+	     code_instruction* instruction);
+
+int loadargs(char* line, int startpos,
+	     code_instruction* instruction);
+
+int loadarg2(char* line, int startpos,
+	     code_instruction* instruction);
 
 #endif
