@@ -11,7 +11,7 @@ typedef struct {
   void* value;
 } asm_register;
 
-extern void* register_table[REGISTERS_MAX];
+extern asm_register* register_table[REGISTERS_MAX];
 
 void* find_register(char* register_name);
 void init_register_table(void);

@@ -1,5 +1,5 @@
 all:
-	gcc lexer.c opcodes.c executer.c registers.c main.c -g -o main
+	gcc lexer.c opcodes.c executer.c registers.c main.c -Wall -g -o main
 	./main
 
 gdb:

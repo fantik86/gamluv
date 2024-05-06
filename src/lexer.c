@@ -111,9 +111,9 @@ int write_arguments(char* line, int startpos,
       }
       char_arg1[pos - (strlen(opcode_name) + 1)] = line[pos];
     }
-    free(char_arg1);
-    return 1;
   }
+  free(char_arg1);
+  return 1;
 }
 
 void readline(char* line) {
@@ -123,7 +123,6 @@ void readline(char* line) {
   write_instruction(line, &instruction);
   execute_instruction(&instruction);
   printf("instruction = {\n\t%hhu,\n\t%d,\n\t%d\n}\n", instruction.opcode_index, *(int*)instruction.arg1, *(int*)instruction.arg2);
-  printf("%d\n", get_register_value("A"));
 }
 
 /* Returns opcode index from opcode table */
@@ -144,7 +143,7 @@ uint8_t getopcodeargcount(uint8_t index) {
 void readfile(FILE* file) {
   char* line = NULL;
   size_t len = 0;
-  ssize_t read = getline(&line, &len, file);
+  getline(&line, &len, file);
   readline(line);
   if (feof(file) != 0) {
     printf("\n\nEOF\n");

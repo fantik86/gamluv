@@ -7,7 +7,7 @@ char* register_names[REGISTERS_MAX] = {
   "A", "B", "AC"
 };
 
-void* register_table[REGISTERS_MAX];
+asm_register* register_table[REGISTERS_MAX];
 
 /* Type cast of value variable is necessary! */
 int init_register(int index, bool isreadonly,
@@ -28,9 +28,11 @@ int init_register(int index, bool isreadonly,
 
 void* get_register_value(char* name) {
   for (int i = 0; i < REGISTERS_MAX; i++) {
-    if (strcmp(((asm_register*)register_table[i])->name, name))
-      return ((asm_register*)register_table[i])->value;
+    if (strcmp(((asm_register*)register_table[i])->name, name) == 0) {
+      return &register_table[i]->value;
+    }
   }
+  return NULL;
 }
 
 void init_register_table(void) {
@@ -46,5 +48,6 @@ void* find_register(char* register_name) {
   for (int i = 0; i < REGISTERS_MAX; i++) {
     if (strcmp(((asm_register*)register_table[i])->name, register_name))
       return register_table[i];
-    }
+  }
+  return NULL;
 }

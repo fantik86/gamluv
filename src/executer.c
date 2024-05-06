@@ -7,9 +7,10 @@
 void execute_instruction(code_instruction* instruction) {
   int min = INT_MIN;
   int index = instruction->opcode_index;
-  int* arg1_ptr = (int*)instruction->arg1;
   void (*opcode_call)();
+  
   opcode_call = opcode_table[index].function_ptr;
+
   if (*(int*)instruction->arg1 == min)
     /* No arguments */
     opcode_call(&min, &min); 

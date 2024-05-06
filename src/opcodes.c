@@ -11,7 +11,7 @@ void op_addi(void* a, void* b) {
 }
 
 void op_inci(void* a, void* b) {
-  *(int*)a++;
+  a++;
 }
 
 void op_subi(void* a, void* b) {
@@ -19,7 +19,7 @@ void op_subi(void* a, void* b) {
 }
 
 void op_deci(void* a, void* b) {
-  *(int*)a--;
+  a--;
 }
 
 
