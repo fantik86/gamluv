@@ -1,1 +1,2 @@
 addi A,17
+addi A,12

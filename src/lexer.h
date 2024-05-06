@@ -12,8 +12,8 @@ typedef struct {
 
 void readfile(FILE* file);
 
-void readline(char* line);
-
+void asm_auto_read_line(char* line);
+  
 uint8_t getopcodeindex(char* opcodestr);
 
 uint8_t getopcodeargcount(uint8_t index);

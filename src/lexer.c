@@ -6,6 +6,8 @@
 #include "opcodes.h"
 #include "executer.h"
 #include "registers.h"
+#include "debug.h"
+#include "types.h"
 #define CHAR_COMMA ','
 #define CHAR_SPACE ' '
 #define CHAR_ENDLINE '\0'
@@ -116,13 +118,13 @@ int write_arguments(char* line, int startpos,
   return 1;
 }
 
-void readline(char* line) {
+void asm_auto_read_line(char* line) {
   
   code_instruction instruction;
   
   write_instruction(line, &instruction);
   execute_instruction(&instruction);
-  printf("instruction = {\n\t%hhu,\n\t%d,\n\t%d\n}\n", instruction.opcode_index, *(int*)instruction.arg1, *(int*)instruction.arg2);
+  instruction_print(instruction, ASM_INT, ASM_INT);
 }
 
 /* Returns opcode index from opcode table */
@@ -144,9 +146,11 @@ void readfile(FILE* file) {
   char* line = NULL;
   size_t len = 0;
   getline(&line, &len, file);
-  readline(line);
-  if (feof(file) != 0) {
+  printf(line);
+  asm_auto_read_line(line);
+  
+  if (feof(file)) {
     printf("\n\nEOF\n");
-    return;
   }
+  return;
 }
